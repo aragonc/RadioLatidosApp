@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Radio Latidos</string>
+    <string name="web">www.latidos.pe</string>
+    <string name="company">Peruenlinea Comunicaciones y Servicios S.A.C</string>
+    <string name="copyright">Derechos reservados</string>
+    <string name="slogan">Acelera tu corazón</string>
+    <string name="title_activity_splash">SplashActivity</string>
+</resources>
