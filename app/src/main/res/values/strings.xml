@@ -5,4 +5,8 @@
     <string name="copyright">Derechos reservados</string>
     <string name="slogan">Acelera tu corazón</string>
     <string name="title_activity_splash">SplashActivity</string>
+    <string name="buffering">Cargando…</string>
+    <string name="connected">Conectado</string>
+    <string name="pause">Pausado</string>
+    <string name="now_playing">RADIO NAME is now playing</string>
 </resources>
