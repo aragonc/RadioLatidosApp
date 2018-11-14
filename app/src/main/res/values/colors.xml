@@ -5,5 +5,6 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="bgColor">#f22a80</color>
+    <color name="colorVisualizer">#b41157</color>
 
 </resources>

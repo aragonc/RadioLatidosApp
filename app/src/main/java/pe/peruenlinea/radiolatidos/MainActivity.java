@@ -1,33 +1,50 @@
 package pe.peruenlinea.radiolatidos;
 
         import android.app.ProgressDialog;
-        import android.content.Context;
+        import android.graphics.Bitmap;
+        import android.graphics.BitmapFactory;
         import android.media.AudioManager;
         import android.media.MediaPlayer;
         import android.os.AsyncTask;
         import android.os.Bundle;
+        import android.os.StrictMode;
+        import android.support.v4.content.ContextCompat;
         import android.support.v7.app.AppCompatActivity;
         import android.view.View;
         import android.widget.Button;
-        import android.widget.ProgressBar;
+        import android.widget.ImageView;
         import android.widget.TextView;
         import android.util.Log;
+        import android.widget.Toast;
+
+        import com.chibde.visualizer.BarVisualizer;
+        import com.chibde.visualizer.LineBarVisualizer;
+
+        import org.json.JSONArray;
+        import org.json.JSONException;
+        import org.json.JSONObject;
+
+        import java.io.BufferedReader;
+        import java.io.IOException;
+        import java.io.InputStreamReader;
+        import java.net.HttpURLConnection;
+        import java.net.MalformedURLException;
+        import java.net.URL;
 
 
 public class MainActivity extends AppCompatActivity {
 
 
-    private Button startButton, pauseButton, lowVolumen, upVolumen;
+    private Button startButton, pauseButton;
     private MediaPlayer mediaPlayer;
-    private float volumen;
     private String url = "http://iplinea.com:7230";
     private ProgressDialog pd;
     private boolean initialStage= true;
     private boolean playPause;
-    private TextView message;
-    private ProgressBar progressVolumen;
-    private int progressStatus = 0;
-    private int currentVolume = 0;
+    private ImageView imgProgram;
+    private Bitmap loadImage;
+    private TextView message, txtProgram, txtHour, txtSpeaker;
+    private LineBarVisualizer lineVisualizer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,47 +53,27 @@ public class MainActivity extends AppCompatActivity {
 
         pd = new ProgressDialog(this);
 
-
-        AudioManager audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        currentVolume = audio.getStreamVolume(AudioManager.STREAM_MUSIC);
-
-        progressVolumen = (ProgressBar) findViewById(R.id.progressBar);
-        progressVolumen.setMax(100);
-        progressVolumen.setScaleY(3f);
-        progressVolumen.setProgress(currentVolume);
-
         mediaPlayer = new MediaPlayer();
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-
         startButton = (Button) findViewById(R.id.btnPlay);
         pauseButton = (Button) findViewById(R.id.btnPause);
-        lowVolumen = (Button) findViewById(R.id.btnLow);
-        upVolumen = (Button) findViewById(R.id.btnUp);
         message = (TextView) findViewById(R.id.txtMessage);
 
+        //Items View Programs
+        txtProgram = (TextView) findViewById(R.id.txtProgram);
+        txtHour = (TextView) findViewById(R.id.txtHour);
+        txtSpeaker = (TextView) findViewById(R.id.txtSpeaker);
+        imgProgram = (ImageView) findViewById(R.id.imgProgram);
+
+        //Visualizer Audio
+        lineVisualizer = findViewById(R.id.visualizer);
+        lineVisualizer.setColor(ContextCompat.getColor(this, R.color.colorVisualizer));
+        lineVisualizer.setDensity(70);
 
 
-        lowVolumen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                volumen = (float) (volumen - 0.1);
-                mediaPlayer.setVolume(volumen,volumen);
-                progressStatus -= 10;
-                progressVolumen.setProgress(progressStatus);
-            }
-        });
-
-        upVolumen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                volumen = (float) (volumen + 0.1);
-                mediaPlayer.setVolume(volumen,volumen);
-                progressStatus += 10;
-                progressVolumen.setProgress(progressStatus);
-            }
-        });
-
+        pauseButton.setEnabled(false);
+        getPrograms();
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,17 +86,20 @@ public class MainActivity extends AppCompatActivity {
                     if(initialStage){
 
                         new Player().execute(url);
+
                     } else {
 
                         if(!mediaPlayer.isPlaying()){
-                            volumen = (float) currentVolume;
-                            mediaPlayer.setVolume(volumen,volumen);
                             mediaPlayer.start();
+                            lineVisualizer.setPlayer(mediaPlayer.getAudioSessionId());
                         }
                     }
 
                     playPause = true;
+                    pauseButton.setEnabled(true);
+                    startButton.setEnabled(false);
                 }
+
 
 
             }
@@ -109,29 +109,43 @@ public class MainActivity extends AppCompatActivity {
         pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 message.setText(R.string.pause);
+
                 if(mediaPlayer.isPlaying()){
                     mediaPlayer.pause();
                 }
                 playPause = false;
+                startButton.setEnabled(true);
+                pauseButton.setEnabled(false);
 
             }
         });
 
-
-
-
     }
 
+    void downloadImageProgram(String imageHttpAddress) {
+        URL imageUrl = null;
+        try {
+            imageUrl = new URL(imageHttpAddress);
+            HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
+            conn.connect();
+            loadImage = BitmapFactory.decodeStream(conn.getInputStream());
+            imgProgram.setImageBitmap(loadImage);
+        } catch (IOException e) {
+            Toast.makeText(getApplicationContext(), "Error cargando la imagen: "+e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+    }
 
     protected void onPause(){
         super.onPause();
 
-        if(mediaPlayer != null ){
+        /*if(mediaPlayer != null ){
             mediaPlayer.reset();
             mediaPlayer.release();
             mediaPlayer = null;
-        }
+        }*/
     }
 
     // Classe Player
@@ -184,6 +198,67 @@ public class MainActivity extends AppCompatActivity {
             pd.setMessage("Conectando...");
             pd.show();
         }
+    }
+
+    public void getPrograms(){
+        String urlApi = "http://blenderperu.org/latidosapi/public/api/v1/programs";
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        URL url = null;
+        HttpURLConnection conn;
+
+        try {
+
+            url = new URL(urlApi);
+            conn = (HttpURLConnection) url.openConnection();
+
+            conn.setRequestMethod("GET");
+
+            conn.connect();
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+            String json = "";
+
+            while ((inputLine = in.readLine()) != null){
+                response.append(inputLine);
+            }
+            json = response.toString();
+
+            JSONArray jsonArray = null;
+
+            jsonArray = new JSONArray(json);
+
+            String message = "";
+
+            for(int i = 0; i <jsonArray.length(); i++){
+                if(i == 1){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                    txtProgram.setText(jsonObject.getString("nombre"));
+                    String conductor = "con " + jsonObject.getString("conductor");
+                    txtSpeaker.setText(conductor);
+                    String hora = jsonObject.getString("hora_inicio") + " a " + jsonObject.getString("hora_fin");
+                    txtHour.setText(hora);
+                    String urlImage = jsonObject.getString("avatar");
+                    downloadImageProgram(urlImage);
+                    //Log.d("SLIDA",jsonObject.optString("description"));
+
+                }
+            }
+
+        }catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

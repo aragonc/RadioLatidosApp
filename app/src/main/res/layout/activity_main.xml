@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:background="@drawable/bg_player"
+    android:background="@drawable/bg_player_audio"
     android:backgroundTintMode="screen"
     android:gravity="center"
     android:orientation="vertical"
@@ -19,8 +19,11 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="55dp"
+        android:layout_marginTop="35dp"
         android:text="Radio"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -31,8 +34,11 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:text="Tarde Romanticas"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgProgram" />
@@ -45,6 +51,9 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="3:00pm a 4:00pm"
+        android:textColor="@color/yellow"
+        android:textSize="12sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtProgram" />
@@ -57,21 +66,41 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="con Karen Aguero"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtHour" />
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:id="@+id/imgProgram"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:src="@android:drawable/sym_def_app_icon"
+        app:civ_border_color="@color/white"
+        app:civ_border_width="2dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtRadio"
-        app:srcCompat="@android:drawable/sym_def_app_icon" />
+        />
+
+    <com.chibde.visualizer.LineBarVisualizer
+        android:id="@+id/visualizer"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtSpeaker"
+        app:layout_constraintVertical_bias="0.0"
+        tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/btnPlay"
@@ -101,45 +130,6 @@
         app:layout_constraintTop_toTopOf="@+id/btnPlay"
         app:layout_constraintVertical_bias="1.0" />
 
-    <Button
-        android:id="@+id/btnLow"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="290dp"
-        android:background="@drawable/bg_btn_low"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/btnUp"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="290dp"
-        android:background="@drawable/bg_btn_up"
-        app:layout_constraintBottom_toBottomOf="@+id/btnLow"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="180dp"
-        android:layout_height="32dp"
-        android:layout_marginBottom="45dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="50dp"
-        android:maxHeight="32dp"
-        android:minHeight="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnPlay"
-        app:layout_constraintEnd_toStartOf="@+id/btnUp"
-        app:layout_constraintStart_toEndOf="@+id/btnLow"
-        app:layout_constraintTop_toBottomOf="@+id/txtSpeaker"
-        app:layout_constraintVertical_bias="0.0" />
-
     <android.support.constraint.Barrier
         android:id="@+id/barrier"
         android:layout_width="wrap_content"
@@ -159,7 +149,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="16dp"
         android:text="@string/connected"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
