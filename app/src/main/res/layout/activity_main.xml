@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:background="@drawable/bg_player_audio"
+    android:background="@drawable/bg_player"
     android:backgroundTintMode="screen"
     android:gravity="center"
     android:orientation="vertical"
@@ -86,10 +86,13 @@
         app:layout_constraintTop_toBottomOf="@+id/txtRadio"
         />
 
-    <com.chibde.visualizer.LineBarVisualizer
-        android:id="@+id/visualizer"
+    <ak.sh.ay.musicwave.MusicWave
+        android:id="@+id/musicWave"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        app:colorGradient="true"
+        app:endColor="@color/yellow"
+        app:startColor="@color/white"
+        android:layout_height="150dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
@@ -98,9 +101,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtSpeaker"
+        app:layout_constraintTop_toTopOf="@+id/txtSpeaker"
         app:layout_constraintVertical_bias="0.0"
-        tools:ignore="MissingConstraints" />
+        app:waveThickness="1" />
 
     <Button
         android:id="@+id/btnPlay"
@@ -151,6 +154,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:text="@string/connected"
+        android:textColor="@color/white"
+        android:textSize="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnPause"

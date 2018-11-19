@@ -5,10 +5,10 @@ package pe.peruenlinea.radiolatidos;
         import android.graphics.BitmapFactory;
         import android.media.AudioManager;
         import android.media.MediaPlayer;
+        import android.media.audiofx.Visualizer;
         import android.os.AsyncTask;
         import android.os.Bundle;
         import android.os.StrictMode;
-        import android.support.v4.content.ContextCompat;
         import android.support.v7.app.AppCompatActivity;
         import android.view.View;
         import android.widget.Button;
@@ -16,9 +16,6 @@ package pe.peruenlinea.radiolatidos;
         import android.widget.TextView;
         import android.util.Log;
         import android.widget.Toast;
-
-        import com.chibde.visualizer.BarVisualizer;
-        import com.chibde.visualizer.LineBarVisualizer;
 
         import org.json.JSONArray;
         import org.json.JSONException;
@@ -31,6 +28,8 @@ package pe.peruenlinea.radiolatidos;
         import java.net.MalformedURLException;
         import java.net.URL;
 
+        import ak.sh.ay.musicwave.MusicWave;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,9 +41,9 @@ public class MainActivity extends AppCompatActivity {
     private boolean initialStage= true;
     private boolean playPause;
     private ImageView imgProgram;
-    private Bitmap loadImage;
     private TextView message, txtProgram, txtHour, txtSpeaker;
-    private LineBarVisualizer lineVisualizer;
+    private Visualizer mVisualizer;
+    private MusicWave musicWave;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,13 +65,28 @@ public class MainActivity extends AppCompatActivity {
         txtSpeaker = (TextView) findViewById(R.id.txtSpeaker);
         imgProgram = (ImageView) findViewById(R.id.imgProgram);
 
+        //Load Audio Connect Open App
+
         //Visualizer Audio
-        lineVisualizer = findViewById(R.id.visualizer);
-        lineVisualizer.setColor(ContextCompat.getColor(this, R.color.colorVisualizer));
-        lineVisualizer.setDensity(70);
 
+        musicWave = (MusicWave) findViewById(R.id.musicWave);
+        prepareVisualizer();
 
-        pauseButton.setEnabled(false);
+        if(initialStage){
+
+            new Player().execute(url);
+
+        } else {
+
+            if(!mediaPlayer.isPlaying()){
+                mediaPlayer.start();
+                //lineVisualizer.setPlayer(mediaPlayer.getAudioSessionId());
+                pauseButton.setEnabled(true);
+            }
+        }
+
+        startButton.setEnabled(false);
+
         getPrograms();
 
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
 
                         if(!mediaPlayer.isPlaying()){
                             mediaPlayer.start();
-                            lineVisualizer.setPlayer(mediaPlayer.getAudioSessionId());
                         }
                     }
 
@@ -124,13 +137,30 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void prepareVisualizer() {
+        mVisualizer = new Visualizer(mediaPlayer.getAudioSessionId());
+        mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+        mVisualizer.setDataCaptureListener(
+                new Visualizer.OnDataCaptureListener() {
+                    public void onWaveFormDataCapture(Visualizer visualizer,
+                                                      byte[] bytes, int samplingRate) {
+                        musicWave.updateVisualizer(bytes);
+                    }
+
+                    public void onFftDataCapture(Visualizer visualizer,
+                                                 byte[] bytes, int samplingRate) {
+                    }
+                }, Visualizer.getMaxCaptureRate() / 2, true, false);
+        mVisualizer.setEnabled(true);
+    }
+
     void downloadImageProgram(String imageHttpAddress) {
         URL imageUrl = null;
         try {
             imageUrl = new URL(imageHttpAddress);
             HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
             conn.connect();
-            loadImage = BitmapFactory.decodeStream(conn.getInputStream());
+            Bitmap loadImage = BitmapFactory.decodeStream(conn.getInputStream());
             imgProgram.setImageBitmap(loadImage);
         } catch (IOException e) {
             Toast.makeText(getApplicationContext(), "Error cargando la imagen: "+e.getMessage(), Toast.LENGTH_LONG).show();
