@@ -8,5 +8,8 @@
     <string name="buffering">Cargando…</string>
     <string name="connected">Conectado</string>
     <string name="pause">Pausado</string>
+    <string name="in_facebook">Facebook</string>
+    <string name="in_web">Web</string>
+    <string name="in_wps">Pedidos</string>
     <string name="now_playing">RADIO NAME is now playing</string>
 </resources>

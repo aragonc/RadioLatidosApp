@@ -1,34 +1,43 @@
 package pe.peruenlinea.radiolatidos;
 
-        import android.app.ProgressDialog;
-        import android.graphics.Bitmap;
-        import android.graphics.BitmapFactory;
-        import android.media.AudioManager;
-        import android.media.MediaPlayer;
-        import android.media.audiofx.Visualizer;
-        import android.os.AsyncTask;
-        import android.os.Bundle;
-        import android.os.StrictMode;
-        import android.support.v7.app.AppCompatActivity;
-        import android.view.View;
-        import android.widget.Button;
-        import android.widget.ImageView;
-        import android.widget.TextView;
-        import android.util.Log;
-        import android.widget.Toast;
+import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.audiofx.Visualizer;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.StrictMode;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
+import android.support.v7.app.AppCompatActivity;
+import android.telephony.PhoneNumberUtils;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.util.Log;
+import android.widget.Toast;
 
-        import org.json.JSONArray;
-        import org.json.JSONException;
-        import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-        import java.io.BufferedReader;
-        import java.io.IOException;
-        import java.io.InputStreamReader;
-        import java.net.HttpURLConnection;
-        import java.net.MalformedURLException;
-        import java.net.URL;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-        import ak.sh.ay.musicwave.MusicWave;
+import ak.sh.ay.musicwave.MusicWave;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -38,12 +47,15 @@ public class MainActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private String url = "http://iplinea.com:7230";
     private ProgressDialog pd;
-    private boolean initialStage= true;
+    private boolean initialStage = true;
     private boolean playPause;
     private ImageView imgProgram;
     private TextView message, txtProgram, txtHour, txtSpeaker;
-    private Visualizer mVisualizer;
+    protected Visualizer mVisualizer;
     private MusicWave musicWave;
+    protected BottomNavigationView menuButton;
+    public static String FACEBOOK_URL = "https://www.facebook.com/radiolatidosperu";
+    public static String FACEBOOK_PAGE_ID = "radiolatidosperu";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         txtProgram = (TextView) findViewById(R.id.txtProgram);
         txtHour = (TextView) findViewById(R.id.txtHour);
         txtSpeaker = (TextView) findViewById(R.id.txtSpeaker);
+        menuButton = (BottomNavigationView) findViewById(R.id.navigationView);
         imgProgram = (ImageView) findViewById(R.id.imgProgram);
 
         //Load Audio Connect Open App
@@ -72,13 +85,13 @@ public class MainActivity extends AppCompatActivity {
         musicWave = (MusicWave) findViewById(R.id.musicWave);
         prepareVisualizer();
 
-        if(initialStage){
+        if (initialStage) {
 
             new Player().execute(url);
 
         } else {
 
-            if(!mediaPlayer.isPlaying()){
+            if (!mediaPlayer.isPlaying()) {
                 mediaPlayer.start();
                 //lineVisualizer.setPlayer(mediaPlayer.getAudioSessionId());
                 pauseButton.setEnabled(true);
@@ -89,21 +102,45 @@ public class MainActivity extends AppCompatActivity {
 
         getPrograms();
 
+        //Menu Bottom
+        menuButton.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.navigation_facebook:
+                        Intent facebookIntent = new Intent(Intent.ACTION_VIEW);
+                        String facebookUrl = getFacebookPageURL(MainActivity.this);
+                        facebookIntent.setData(Uri.parse(facebookUrl));
+                        startActivity(facebookIntent);
+                        break;
+                    case R.id.navigation_web:
+                        Uri uri = Uri.parse("http://latidos.pe/");
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        startActivity(intent);
+                        break;
+                    case R.id.navigation_whatsapp:
+                        AbrirWhatsApp("954189939");
+                        break;
+                }
+                return true;
+            }
+        });
+
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if(!playPause){
+                if (!playPause) {
 
                     message.setText(R.string.connected);
 
-                    if(initialStage){
+                    if (initialStage) {
 
                         new Player().execute(url);
 
                     } else {
 
-                        if(!mediaPlayer.isPlaying()){
+                        if (!mediaPlayer.isPlaying()) {
                             mediaPlayer.start();
                         }
                     }
@@ -112,7 +149,6 @@ public class MainActivity extends AppCompatActivity {
                     pauseButton.setEnabled(true);
                     startButton.setEnabled(false);
                 }
-
 
 
             }
@@ -125,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
                 message.setText(R.string.pause);
 
-                if(mediaPlayer.isPlaying()){
+                if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
                 }
                 playPause = false;
@@ -135,6 +171,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void AbrirWhatsApp(String telefono)
+    {
+        Intent _intencion = new Intent("android.intent.action.MAIN");
+        _intencion.setComponent(new ComponentName("com.whatsapp","com.whatsapp.Conversation"));
+        _intencion.putExtra("jid", PhoneNumberUtils.stripSeparators("51" + telefono)+"@s.whatsapp.net");
+        startActivity(_intencion);
+    }
+
+    public String getFacebookPageURL(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            int versionCode = packageManager.getPackageInfo("com.facebook.katana", 0).versionCode;
+            if (versionCode >= 3002850) { //newer versions of fb app
+                return "fb://facewebmodal/f?href=" + FACEBOOK_URL;
+            } else { //older versions of fb app
+                return "fb://page/" + FACEBOOK_PAGE_ID;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            return FACEBOOK_URL; //normal web url
+        }
     }
 
     private void prepareVisualizer() {
@@ -163,12 +221,12 @@ public class MainActivity extends AppCompatActivity {
             Bitmap loadImage = BitmapFactory.decodeStream(conn.getInputStream());
             imgProgram.setImageBitmap(loadImage);
         } catch (IOException e) {
-            Toast.makeText(getApplicationContext(), "Error cargando la imagen: "+e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Error cargando la imagen: " + e.getMessage(), Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
     }
 
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
 
         /*if(mediaPlayer != null ){
@@ -177,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer = null;
         }*/
     }
+
 
     // Classe Player
 
@@ -230,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void getPrograms(){
+    public void getPrograms() {
         String urlApi = "http://blenderperu.org/latidosapi/public/api/v1/programs";
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -254,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
             StringBuffer response = new StringBuffer();
             String json = "";
 
-            while ((inputLine = in.readLine()) != null){
+            while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
             json = response.toString();
@@ -265,8 +324,8 @@ public class MainActivity extends AppCompatActivity {
 
             String message = "";
 
-            for(int i = 0; i <jsonArray.length(); i++){
-                if(i == 1){
+            for (int i = 0; i < jsonArray.length(); i++) {
+                if (i == 1) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
 
                     txtProgram.setText(jsonObject.getString("nombre"));
@@ -281,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-        }catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_facebook"
+        android:icon="@drawable/btn_facebook"
+        android:enabled="true"
+        android:title="@string/in_facebook"/>
+
+    <item
+        android:id="@+id/navigation_web"
+        android:icon="@drawable/btn_web"
+        android:enabled="true"
+        android:title="@string/in_web"/>
+
+    <item
+        android:id="@+id/navigation_whatsapp"
+        android:icon="@drawable/btn_whatsapp"
+        android:enabled="true"
+        android:title="@string/in_wps"/>
+</menu>
