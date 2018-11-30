@@ -5,15 +5,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -21,21 +18,8 @@ import android.telephony.PhoneNumberUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.util.Log;
-import android.widget.Toast;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import ak.sh.ay.musicwave.MusicWave;
 
@@ -49,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog pd;
     private boolean initialStage = true;
     private boolean playPause;
-    private ImageView imgProgram;
-    private TextView message, txtProgram, txtHour, txtSpeaker;
+    //private ImageView imgProgram;
+    private TextView message; // txtProgram, txtHour, txtSpeaker;
     protected Visualizer mVisualizer;
     private MusicWave musicWave;
     protected BottomNavigationView menuButton;
@@ -70,13 +54,8 @@ public class MainActivity extends AppCompatActivity {
         startButton = (Button) findViewById(R.id.btnPlay);
         pauseButton = (Button) findViewById(R.id.btnPause);
         message = (TextView) findViewById(R.id.txtMessage);
-
-        //Items View Programs
-        txtProgram = (TextView) findViewById(R.id.txtProgram);
-        txtHour = (TextView) findViewById(R.id.txtHour);
-        txtSpeaker = (TextView) findViewById(R.id.txtSpeaker);
         menuButton = (BottomNavigationView) findViewById(R.id.navigationView);
-        imgProgram = (ImageView) findViewById(R.id.imgProgram);
+
 
         //Load Audio Connect Open App
 
@@ -100,8 +79,6 @@ public class MainActivity extends AppCompatActivity {
 
         startButton.setEnabled(false);
 
-        getPrograms();
-
         //Menu Bottom
         menuButton.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -119,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(intent);
                         break;
                     case R.id.navigation_whatsapp:
-                        AbrirWhatsApp("954189939");
+                        openWhatsApp("966407223");
                         break;
                 }
                 return true;
@@ -173,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void AbrirWhatsApp(String telefono)
+    private void openWhatsApp(String telefono)
     {
         Intent _intencion = new Intent("android.intent.action.MAIN");
         _intencion.setComponent(new ComponentName("com.whatsapp","com.whatsapp.Conversation"));
@@ -212,28 +189,9 @@ public class MainActivity extends AppCompatActivity {
         mVisualizer.setEnabled(true);
     }
 
-    void downloadImageProgram(String imageHttpAddress) {
-        URL imageUrl = null;
-        try {
-            imageUrl = new URL(imageHttpAddress);
-            HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
-            conn.connect();
-            Bitmap loadImage = BitmapFactory.decodeStream(conn.getInputStream());
-            imgProgram.setImageBitmap(loadImage);
-        } catch (IOException e) {
-            Toast.makeText(getApplicationContext(), "Error cargando la imagen: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-    }
 
     protected void onPause() {
         super.onPause();
-
-        /*if(mediaPlayer != null ){
-            mediaPlayer.reset();
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }*/
     }
 
 
@@ -287,67 +245,6 @@ public class MainActivity extends AppCompatActivity {
             pd.setMessage("Conectando...");
             pd.show();
         }
-    }
-
-    public void getPrograms() {
-        String urlApi = "http://blenderperu.org/latidosapi/public/api/v1/programs";
-
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-
-        URL url = null;
-        HttpURLConnection conn;
-
-        try {
-
-            url = new URL(urlApi);
-            conn = (HttpURLConnection) url.openConnection();
-
-            conn.setRequestMethod("GET");
-
-            conn.connect();
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            String json = "";
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            json = response.toString();
-
-            JSONArray jsonArray = null;
-
-            jsonArray = new JSONArray(json);
-
-            String message = "";
-
-            for (int i = 0; i < jsonArray.length(); i++) {
-                if (i == 1) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                    txtProgram.setText(jsonObject.getString("nombre"));
-                    String conductor = "con " + jsonObject.getString("conductor");
-                    txtSpeaker.setText(conductor);
-                    String hora = jsonObject.getString("hora_inicio") + " a " + jsonObject.getString("hora_fin");
-                    txtHour.setText(hora);
-                    String urlImage = jsonObject.getString("avatar");
-                    downloadImageProgram(urlImage);
-                    //Log.d("SLIDA",jsonObject.optString("description"));
-
-                }
-            }
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
     }
 
 }

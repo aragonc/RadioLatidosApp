@@ -9,8 +9,6 @@ import android.widget.ImageView;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 
 public class SplashActivity extends Activity {
 
@@ -24,7 +22,7 @@ public class SplashActivity extends Activity {
         //llamamos a la plantilla
 
         setContentView(R.layout.splash);
-        logo = (ImageView) findViewById(R.id.imgLogo);
+        logo = (ImageView) findViewById(R.id.imgLogotipo);
         txtUrl = (TextView) findViewById(R.id.txtWeb);
         txtCompany = (TextView) findViewById(R.id.txtCompany);
         txtCopyright = (TextView) findViewById(R.id.txtCopyright);
