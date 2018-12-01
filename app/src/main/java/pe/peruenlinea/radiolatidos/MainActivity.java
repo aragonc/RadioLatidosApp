@@ -109,12 +109,18 @@ public class MainActivity extends AppCompatActivity {
                         Intent facebookIntent = new Intent(Intent.ACTION_VIEW);
                         String facebookUrl = getFacebookPageURL(MainActivity.this);
                         facebookIntent.setData(Uri.parse(facebookUrl));
-                        startActivity(facebookIntent);
+                        if (getPackageManager().resolveActivity(facebookIntent, 0) != null) {
+                            startActivity(facebookIntent);
+                        }
+
                         break;
                     case R.id.navigation_web:
                         Uri uri = Uri.parse("http://latidos.pe/");
                         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                        startActivity(intent);
+                        if (getPackageManager().resolveActivity(intent, 0) != null) {
+                            startActivity(intent);
+                        }
+
                         break;
                     case R.id.navigation_whatsapp:
                         openWhatsApp("966407223");
