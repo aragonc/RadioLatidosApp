@@ -1,8 +1,9 @@
 package pe.peruenlinea.radiolatidos;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
@@ -10,18 +11,23 @@ import android.media.MediaPlayer;
 import android.media.audiofx.Visualizer;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.PhoneNumberUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.util.Log;
+import android.widget.Toast;
 
 import ak.sh.ay.musicwave.MusicWave;
+
+import static android.Manifest.permission.RECORD_AUDIO;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -40,6 +46,10 @@ public class MainActivity extends AppCompatActivity {
     protected BottomNavigationView menuButton;
     public static String FACEBOOK_URL = "https://www.facebook.com/radiolatidosperu";
     public static String FACEBOOK_PAGE_ID = "radiolatidosperu";
+
+    private static final int ACCESS_PERMISSION_RECORD_AUDIO = 0;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,20 +72,31 @@ public class MainActivity extends AppCompatActivity {
         //Visualizer Audio
 
         musicWave = (MusicWave) findViewById(R.id.musicWave);
-        prepareVisualizer();
+
 
         if (initialStage) {
-
             new Player().execute(url);
-
         } else {
-
             if (!mediaPlayer.isPlaying()) {
                 mediaPlayer.start();
-                //lineVisualizer.setPlayer(mediaPlayer.getAudioSessionId());
                 pauseButton.setEnabled(true);
             }
         }
+
+        //Permissions
+        int permissionCheck = ContextCompat.checkSelfPermission(this, RECORD_AUDIO);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if(permissionCheck == PackageManager.PERMISSION_GRANTED){
+                prepareVisualizer();
+            } else {
+                final String[] permissions = new String[]{RECORD_AUDIO};
+                requestPermissions(permissions,ACCESS_PERMISSION_RECORD_AUDIO);
+            }
+        } else {
+            prepareVisualizer();
+        }
+
 
         startButton.setEnabled(false);
 
@@ -150,12 +171,39 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void openWhatsApp(String telefono)
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == ACCESS_PERMISSION_RECORD_AUDIO){
+            if(shouldShowRequestPermissionRationale(RECORD_AUDIO)){
+                AlertDialog.Builder  builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.title_permissions);
+                builder.setMessage(R.string.content_permissions);
+                builder.setPositiveButton(R.string.to_accept, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        final String[] permissions = new String[]{RECORD_AUDIO};
+                        requestPermissions(permissions,ACCESS_PERMISSION_RECORD_AUDIO);
+                    }
+                });
+                builder.show();
+            }
+        }
+    }
+
+    private void openWhatsApp(String phone)
     {
-        Intent _intencion = new Intent("android.intent.action.MAIN");
-        _intencion.setComponent(new ComponentName("com.whatsapp","com.whatsapp.Conversation"));
-        _intencion.putExtra("jid", PhoneNumberUtils.stripSeparators("51" + telefono)+"@s.whatsapp.net");
-        startActivity(_intencion);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setPackage("com.whatsapp");
+        intent.setData(Uri.parse(String.format("https://api.whatsapp.com/send?phone=%s", "51" + phone)));
+        if (getPackageManager().resolveActivity(intent, 0) != null) {
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, R.string.install_wps, Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     public String getFacebookPageURL(Context context) {

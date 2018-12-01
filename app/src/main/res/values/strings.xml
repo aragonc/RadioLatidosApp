@@ -11,5 +11,9 @@
     <string name="in_facebook">Facebook</string>
     <string name="in_web">Web</string>
     <string name="in_wps">Pedidos</string>
+    <string name="to_accept">Aceptar</string>
+    <string name="install_wps">Por favor instalar WhatsApp</string>
     <string name="now_playing">RADIO NAME is now playing</string>
+    <string name="title_permissions">Gestión de permisos</string>
+    <string name="content_permissions">Debes de aceptar este permiso para porder usar esta aplicación, este permiso permite visualizar el gráfico de sonido</string>
 </resources>
