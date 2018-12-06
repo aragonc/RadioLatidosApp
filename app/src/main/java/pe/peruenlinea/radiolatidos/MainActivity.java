@@ -32,8 +32,6 @@ import android.widget.TextView;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.security.acl.NotOwnerException;
-
 import ak.sh.ay.musicwave.MusicWave;
 
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -42,7 +40,7 @@ import static android.Manifest.permission.RECORD_AUDIO;
 public class MainActivity extends AppCompatActivity {
 
 
-    private Button startButton, pauseButton;
+    private Button startButton, pauseButton, btnClose;
     private MediaPlayer mediaPlayer;
     private String url = "http://iplinea.com:7230";
     private ProgressDialog pd;
@@ -74,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
         startButton = (Button) findViewById(R.id.btnPlay);
         pauseButton = (Button) findViewById(R.id.btnPause);
+        btnClose = (Button) findViewById(R.id.btnClose);
         message = (TextView) findViewById(R.id.txtMessage);
         menuButton = (BottomNavigationView) findViewById(R.id.navigationView);
 
@@ -144,6 +143,16 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
                 return true;
+            }
+        });
+
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+                mediaPlayer = null;
+                MainActivity.this.finish();
             }
         });
 
