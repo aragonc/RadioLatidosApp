@@ -16,5 +16,6 @@
     <string name="install_facebook">Por favor instalar Facebook</string>
     <string name="now_playing">RADIO NAME is now playing</string>
     <string name="title_permissions">Gestión de permisos</string>
+    <string name="listening">Estás escuchando</string>
     <string name="content_permissions">Debes de aceptar este permiso para porder usar esta aplicación, este permiso permite visualizar el gráfico de sonido</string>
 </resources>
