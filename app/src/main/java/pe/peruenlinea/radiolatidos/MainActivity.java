@@ -1,5 +1,6 @@
 package pe.peruenlinea.radiolatidos;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button startButton, pauseButton, btnClose;
     private MediaPlayer mediaPlayer;
-    private String url = "http://iplinea.com:7230";
+    private String url = "http://iplinea.com:9944";
     private ProgressDialog pd;
     private boolean initialStage = true;
     private boolean playPause;
@@ -51,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
     protected Visualizer mVisualizer;
     private MusicWave musicWave;
     protected BottomNavigationView menuButton;
-    public static String FACEBOOK_URL = "https://www.facebook.com/radiolatidosperu";
-    public static String FACEBOOK_PAGE_ID = "radiolatidosperu";
+    public static String FACEBOOK_URL = "https://www.facebook.com/radiolatidosHuaral";
+    public static String FACEBOOK_PAGE_ID = "radiolatidosHuaral";
 
     private static final int ACCESS_PERMISSION_RECORD_AUDIO = 0;
     private static final String CHANNEL_ID = "NOTIFICACION";
@@ -149,10 +150,7 @@ public class MainActivity extends AppCompatActivity {
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
-                mediaPlayer = null;
-                MainActivity.this.finish();
+                stopPlaying();
             }
         });
 
@@ -234,24 +232,35 @@ public class MainActivity extends AppCompatActivity {
     }
     public void notificactionCompatApp(){
 
+        //Intent intent = new Intent(this, MainActivity.class);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        //PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID);
         builder.setSmallIcon(R.drawable.icon_radio);
-        builder.setContentText("Conectado");
+        builder.setContentText("Reproduciendo radio en segundo plano");
         builder.setContentTitle("Radio Latidos");
         builder.setColor(Color.argb(1,250,165,225));
         builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
         builder.setLights(Color.YELLOW, 1000,1000);
-        builder.setContentIntent(pendingIntent);
+        //builder.setContentIntent(pendingIntent);
+        builder.setAutoCancel(true);
+
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(getApplicationContext());
         notificationManagerCompat.notify(NOTIFICATION_ID, builder.build());
 
+    }
 
+    private void stopPlaying() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancel(NOTIFICATION_ID);
+        MainActivity.this.finish();
     }
 
     private void openWhatsApp(String phone)
@@ -302,6 +311,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onPause() {
         super.onPause();
+
     }
 
 
